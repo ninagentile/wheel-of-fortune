@@ -1,6 +1,13 @@
 import os
 
-from base_models import Player, Match, Wheel, MatchResult
+from base_models import (
+    Player,
+    Match,
+    Wheel,
+    MatchResult,
+    FinalMatch,
+    WonderWheel,
+)
 from phrases import phrases
 
 
@@ -8,9 +15,21 @@ def change_player(current_player_idx: int, players: list):
     return (current_player_idx + 1) % len(players)
 
 
+def choose_winner(players: list[Player]) -> Player:
+    max_score = 0
+    winner = None
+    for player in players:
+        if player.score > max_score:
+            max_score = player.score
+            winner = player
+    return winner
+
+
 def main():
     players: list[Player] = [
-        Player(name='Jack'), Player(name='Angi'), Player(name='Nina')
+        Player(name='Jack'),
+        Player(name='Angi'),
+        Player(name='Nina'),
     ]
 
     curr_player_idx = 0
@@ -23,9 +42,7 @@ def main():
         while True:
             curr_player = players[curr_player_idx]
 
-            match = Match(
-                player=curr_player, wheel=wheel, phrase=phrase
-            )
+            match = Match(player=curr_player, wheel=wheel, phrase=phrase)
             match_result = match.play_match()
 
             if match_result == MatchResult.WIN:
@@ -44,7 +61,13 @@ def main():
                     current_player_idx=curr_player_idx, players=players
                 )
 
+    winner = choose_winner(players=players)
+    wonder_wheel = WonderWheel()
+    match = FinalMatch(
+        player=winner, wheel=wonder_wheel, phrases=final_phrases
+    )
+    match_result = match.play_match()
+
 
 if __name__ == '__main__':
     main()
-

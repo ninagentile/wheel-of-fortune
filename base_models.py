@@ -22,15 +22,15 @@ class Phrase:
         current_guess = []
         for char in self.phrase_to_guess:
             if char.isalpha():
-                current_guess.append("_")
+                current_guess.append('_')
             else:
                 current_guess.append(char)
 
         return current_guess
 
     def print(self):
-        print(f"Argomento: {self.title}")
-        print("".join([e for e in self.current_guess]))
+        print(f'Argomento: {self.title}')
+        print(''.join([e for e in self.current_guess]))
 
     def add_letter_to_current_guess_and_compute_score(
         self, letter: str, value: int
@@ -50,13 +50,13 @@ class Phrase:
 
     def check_completed(self) -> bool:
         for el in self.current_guess:
-            if el == "_":
+            if el == '_':
                 return False
         return True
 
     @staticmethod
     def print_error():
-        print("❌❌❌❌❌❌❌")
+        print('❌❌❌❌❌❌❌')
         input()
 
     def reveal_start_and_end(self):
@@ -65,7 +65,7 @@ class Phrase:
                 self.current_guess[idx] = self.phrase_to_guess[idx]
             else:
                 if self.current_guess[idx].isalpha() is False and (
-                    self.current_guess[idx] != "_"
+                    self.current_guess[idx] != '_'
                 ):
                     self.current_guess[idx - 1] = self.phrase_to_guess[idx - 1]
                     if idx + 1 <= len(self.current_guess) - 1:
@@ -107,7 +107,7 @@ class Player:
 
     def print_scores(self):
         print(
-            f"\n {self.name} \nScore: {self.temp_score} \nTotal: {self.score}\n"
+            f'\n {self.name} \nScore: {self.temp_score} \nTotal: {self.score}\n'
         )
 
 
@@ -138,10 +138,10 @@ class Wheel(AbstractWheel):
             slices.append(
                 Slice(value=choice([100, 200, 300, 400, 500, 600, 700]))
             )
-        slices.append(Slice(value="Bancarotta"))
-        slices.append(Slice(value="Bancarotta"))
-        slices.append(Slice(value="Passa"))
-        slices.append(Slice(value="Passa"))
+        slices.append(Slice(value='Bancarotta'))
+        slices.append(Slice(value='Bancarotta'))
+        slices.append(Slice(value='Passa'))
+        slices.append(Slice(value='Passa'))
 
         return slices
 
@@ -182,15 +182,15 @@ class WonderWheel(AbstractWheel):
             slices.append(Slice(value=20000))
         slices.append(Slice(value=100000))
         slices.append(Slice(value=200000))
-        slices.append(Slice(value="Buono abbraccio"))
+        slices.append(Slice(value='Buono abbraccio'))
 
         return slices
 
 
 class MatchResult(Enum):
-    WIN = "win"
-    LOSE = "lose"
-    KEEP_PLAYING = "keep_playing"
+    WIN = 'win'
+    LOSE = 'lose'
+    KEEP_PLAYING = 'keep_playing'
 
 
 class Match:
@@ -202,33 +202,33 @@ class Match:
     def play_match(self):
         match_result = MatchResult.KEEP_PLAYING
         while match_result == MatchResult.KEEP_PLAYING:
-            os.system("cls")
+            os.system('cls')
             self.phrase.print()
             self.player.print_scores()
-            print("Cosa vuoi fare?")
-            print("1) Girare la ruota")
-            print("2) Comprare una vocale")
-            print("3) Dare la soluzione")
+            print('Cosa vuoi fare?')
+            print('1) Girare la ruota')
+            print('2) Comprare una vocale')
+            print('3) Dare la soluzione')
             choice = input()
             match choice:
-                case "1":
+                case '1':
                     match_result = self._spin_wheel_and_play()
-                case "2":
+                case '2':
                     match_result = self._insert_vowel()
-                case "3":
+                case '3':
                     match_result = self._give_solution()
 
         return match_result
 
     def _spin_wheel_and_play(self) -> MatchResult:
         slice_value = self.wheel.turn_wheel()
-        input(f"Risultato: {slice_value}")
+        input(f'Risultato: {slice_value}')
         if isinstance(slice_value, int):
             return self._play(slice_value, is_vowel=False)
-        elif slice_value.lower() == "bancarotta":
+        elif slice_value.lower() == 'bancarotta':
             self.player.bankrupt()
             return MatchResult.LOSE
-        elif slice_value.lower() == "passa":
+        elif slice_value.lower() == 'passa':
             return MatchResult.LOSE
 
     def _insert_vowel(self) -> MatchResult:
@@ -244,10 +244,10 @@ class Match:
 
     def _play(self, slice_value: int, is_vowel: bool) -> MatchResult:
         if is_vowel:
-            print("Inserire la vocale")
+            print('Inserire la vocale')
             slice_value = 1
         else:
-            print("Inserire la consonante")
+            print('Inserire la consonante')
         letter = input()
         score = self.phrase.add_letter_to_current_guess_and_compute_score(
             letter=letter, value=slice_value
@@ -259,7 +259,7 @@ class Match:
         return MatchResult.LOSE
 
     def _give_solution(self) -> MatchResult:
-        print("Digita la soluzione")
+        print('Digita la soluzione')
         solution = input()
         if self.phrase.is_equal_to(solution):
             self.player.increase_temp_score(1000)
@@ -299,21 +299,21 @@ class FinalMatch:
         phrase = self.phrases[0]
         # Add initial letters
         phrase.add_letter_to_current_guess_and_compute_score(
-            letter="N", value=1
+            letter='N', value=1
         )
         phrase.add_letter_to_current_guess_and_compute_score(
-            letter="R", value=1
+            letter='R', value=1
         )
         phrase.add_letter_to_current_guess_and_compute_score(
-            letter="T", value=1
+            letter='T', value=1
         )
         phrase.add_letter_to_current_guess_and_compute_score(
-            letter="E", value=1
+            letter='E', value=1
         )
         phrase.print()
 
         # Ask player to give three consonants and a vowel
-        letters = input("Inserire 3 consonanti e 1 vocale")
+        letters = input('Inserire 3 consonanti e 1 vocale')
         for letter in letters:
             phrase.add_letter_to_current_guess_and_compute_score(
                 letter=letter, value=1

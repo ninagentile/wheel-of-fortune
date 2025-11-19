@@ -17,8 +17,7 @@ for phrase in phrases:
         os.system('cls')
         phrase.print()
         print(
-            'Cosa vuoi fare? A do la soluzione, un pulsante qualsiasi '
-            'per dare una lettera'
+            'Cosa vuoi fare? A do la soluzione, un pulsante qualsiasi per dare una lettera'
         )
         move = input()
 
