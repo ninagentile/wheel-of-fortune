@@ -298,9 +298,6 @@ class FinalMatch:
             prizes=prizes,
         )
 
-    def _choose_prize(self, won_matches: list[bool], prizes: list[str | int]):
-        pass
-
     def _play_first_match(self) -> tuple[int, bool]:
         phrase = self.phrases[0]
         # Add initial letters
@@ -365,3 +362,80 @@ class FinalMatch:
                 f'❌❌❌ Hai perso. La frase corretta era: "{phrase.phrase_to_guess}"'
             )
         return match_won
+
+    def _choose_prize(
+        self,
+        won_matches: list[bool],
+        prizes: list[str | int],
+        discarded_prizes: list[bool] = None,
+    ):
+        if discarded_prizes is None:
+            discarded_prizes = [False, False, False]
+
+        print('Scegli la busta')
+        self._print_all_prizes(
+            won_matches=won_matches,
+            prizes=prizes,
+            discarded_prizes=discarded_prizes,
+        )
+
+        chosen_prize_number = input('Busta scelta: ')
+        # Check can choose
+        idx = int(chosen_prize_number) - 1
+        if (won_matches[idx] is False) or (discarded_prizes[idx]):
+            return
+        chosen_prize = prizes[idx]
+        self._open_prize(chosen_prize)
+        discarded_prizes[idx] = True
+        if self._can_change_prize(won_matches, discarded_prizes):
+            change = input('Vuoi cambiare la busta?')
+            if change.lower() == 'si':
+                self._choose_prize(won_matches, prizes, discarded_prizes)
+        else:
+            if isinstance(chosen_prize, int):
+                print(f'Vincita totale: {self.player.score + chosen_prize}€')
+            else:
+                print(f'Vincita totale: {self.player.score}€ e {chosen_prize}')
+
+        self._print_all_prizes(
+            won_matches=won_matches,
+            prizes=prizes,
+            discarded_prizes=discarded_prizes,
+            chosen_prize_index=idx
+        )
+
+    @staticmethod
+    def _open_prize(chosen_prize: str | int):
+        print('Il contenuto della busta è.....')
+        # sleep(5)
+        print(chosen_prize)
+
+    @staticmethod
+    def _can_change_prize(
+        won_matches: list[bool], discarded_prizes: list[bool]
+    ) -> bool:
+        return sum(won_matches) > sum(discarded_prizes)
+
+    def _print_all_prizes(
+        self,
+        won_matches: list[bool],
+        prizes: list[str | int],
+        discarded_prizes: list[bool],
+        chosen_prize_index: int = None
+    ):
+        if chosen_prize_index is not None:
+            for idx, prize in enumerate(prizes):
+                if idx == chosen_prize_index:
+                    print(f'Busta {idx + 1} ✅: {prize}')
+                else:
+                    print(f'Busta {idx + 1} ❌: {prize}')
+        else:
+            for idx, (prize, won_match, is_discarded) in enumerate(
+                zip(prizes, won_matches, discarded_prizes)
+            ):
+                if is_discarded:
+                    print(f'Busta {idx + 1} ❌: {prize}')
+                elif won_match:
+                    print(f'Busta {idx + 1} ✅')
+                else:
+                    print(f'Busta {idx + 1} ❌')
