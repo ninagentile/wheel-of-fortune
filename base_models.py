@@ -7,6 +7,7 @@ from time import sleep
 from enum import Enum
 from random import choice
 
+from show_image import show_image
 from timing import start_match_with_time, start_third_match_with_time
 
 vowel_cost = 300
@@ -357,7 +358,8 @@ class FinalMatch:
     def _give_match_result(answer: str, phrase: Phrase) -> bool:
         match_won = phrase.is_equal_to(answer)
         if match_won:
-            print('Complimenti Hai indovinato!!!')
+            # print('Complimenti Hai indovinato!!!')
+            show_image()
         else:
             print(
                 f'❌❌❌ Hai perso. La frase corretta era: "{phrase.phrase_to_guess}"'
