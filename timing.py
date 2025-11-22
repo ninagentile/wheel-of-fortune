@@ -1,6 +1,7 @@
 import threading
 import time
 
+
 stop_flag = False
 total_seconds = 60
 
@@ -8,17 +9,15 @@ total_seconds = 60
 def countdown(seconds):
     global stop_flag
     global total_seconds
-    start = time.time()
+    total_seconds = seconds
     while not stop_flag:
-        elapsed = int(time.time() - start)
-        remaining = seconds - elapsed
-        if remaining < 0:
+        if total_seconds < 0:
             print('\nTempo scaduto!')
             stop_flag = True
             break
-        print(f'\rTempo rimanente: {remaining}s    ', end='')
+        print(f'\rTempo rimanente: {total_seconds}s    ', end='')
         time.sleep(1)
-        total_seconds = remaining
+        total_seconds -= 1
 
 
 def get_input():
@@ -27,10 +26,43 @@ def get_input():
     stop_flag = True
 
 
-def start_match_with_time(remaining_seconds: int) -> int:
+def get_input_third_match(phrase):
+    global total_seconds
+    global stop_flag
+    inserted_vowels = False
+    while total_seconds > 0:
+        letter = input()
+
+        if letter in ['a', 'e', 'i', 'o', 'u']:
+            if inserted_vowels:
+                total_seconds -= 3
+                print('❌ Hai già inserito una vocale')
+            inserted_vowels = True
+
+        # type a number to give the answer
+        if letter.isnumeric():
+            stop_flag = True
+            return
+        # Otherwise insert the letter
+        else:
+            # Check letter exists
+            score = phrase.add_letter_to_current_guess_and_compute_score(
+                letter, value=1
+            )
+
+            # If letter is wrong: decrement seconds
+            if score == 0:
+                total_seconds -= 3
+                print('❌❌❌❌❌❌❌')
+            # Otherwise print
+            print(f'\r{"".join([e for e in phrase.current_guess])}', end='\n')
+
+
+def start_match_with_time(remaining_seconds: int) -> tuple[int, str]:
     global stop_flag
     global total_seconds
     total_seconds = remaining_seconds
+    stop_flag = False
     print('Premi un tasto per fermare il tempo e dare la risposta')
     timer_thread = threading.Thread(target=countdown, args=(total_seconds,))
     input_thread = threading.Thread(target=get_input)
@@ -43,5 +75,28 @@ def start_match_with_time(remaining_seconds: int) -> int:
     timer_thread.join()
 
     print(f'\nTimer fermato: {total_seconds}')
+    answer = input('Scrivi la tua risposta: ')
+    return total_seconds, answer
+
+
+def start_third_match_with_time(remaining_seconds: int, phrase) -> tuple[int, str]:
+    global stop_flag
+    global total_seconds
+    total_seconds = remaining_seconds
+    stop_flag = False
+    print('Premi un tasto per fermare il tempo e dare la risposta')
+    timer_thread = threading.Thread(target=countdown, args=(total_seconds,))
+    input_thread = threading.Thread(
+        target=get_input_third_match, args=(phrase,)
+    )
+
+    timer_thread.start()
+    input_thread.start()
+
+    input_thread.join()
+    stop_flag = True
+    timer_thread.join()
+
+    print(f'\nTimer fermato')
     answer = input('Scrivi la tua risposta: ')
     return total_seconds, answer

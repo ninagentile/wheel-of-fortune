@@ -8,7 +8,7 @@ from base_models import (
     FinalMatch,
     WonderWheel,
 )
-from phrases import phrases
+from phrases import phrases, final_phrases
 
 
 def change_player(current_player_idx: int, players: list):
@@ -31,6 +31,10 @@ def main():
         Player(name='Angi'),
         Player(name='Nina'),
     ]
+
+    # todo: remove
+    players[0].score = 100
+    phrases = []
 
     curr_player_idx = 0
     wheel = Wheel()

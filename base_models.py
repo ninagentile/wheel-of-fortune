@@ -7,7 +7,7 @@ from time import sleep
 from enum import Enum
 from random import choice
 
-from timing import start_match_with_time
+from timing import start_match_with_time, start_third_match_with_time
 
 vowel_cost = 300
 
@@ -281,9 +281,14 @@ class FinalMatch:
 
         # Play each of the three phrases
         remaining_seconds, first_match_won = self._play_first_match()
+
+        input('Premi un tasto per passare al secondo match')
+        os.system('cls')
         remaining_seconds, second_match_won = self._play_second_match(
             remaining_seconds
         )
+        input('Premi un tasto per passare al terzo match')
+        os.system('cls')
         third_match_won = self._play_third_match(remaining_seconds)
 
         # Choose among the available prizes
@@ -313,7 +318,7 @@ class FinalMatch:
         phrase.print()
 
         # Ask player to give three consonants and a vowel
-        letters = input('Inserire 3 consonanti e 1 vocale')
+        letters = input('Inserire 3 consonanti e 1 vocale: ')
         for letter in letters:
             phrase.add_letter_to_current_guess_and_compute_score(
                 letter=letter, value=1
@@ -321,8 +326,8 @@ class FinalMatch:
         phrase.print()
 
         remaining_seconds, answer = start_match_with_time(remaining_seconds=60)
-
-        return remaining_seconds, phrase.is_equal_to(answer)
+        match_won = self._give_match_result(answer=answer, phrase=phrase)
+        return remaining_seconds, match_won
 
     def _play_second_match(self, remaining_seconds: int) -> tuple[int, bool]:
         phrase = self.phrases[1]
@@ -332,4 +337,29 @@ class FinalMatch:
         remaining_seconds, answer = start_match_with_time(
             remaining_seconds=remaining_seconds
         )
-        return remaining_seconds, phrase.is_equal_to(answer)
+
+        match_won = self._give_match_result(answer=answer, phrase=phrase)
+        return remaining_seconds, match_won
+
+    def _play_third_match(self, remaining_seconds: int) -> bool:
+        phrase = self.phrases[-1]
+        phrase.print()
+
+        _, answer = start_third_match_with_time(
+            remaining_seconds=remaining_seconds, phrase=phrase
+        )
+
+        match_won = self._give_match_result(answer=answer, phrase=phrase)
+
+        return match_won
+
+    @staticmethod
+    def _give_match_result(answer: str, phrase: Phrase) -> bool:
+        match_won = phrase.is_equal_to(answer)
+        if match_won:
+            print('Complimenti Hai indovinato!!!')
+        else:
+            print(
+                f'❌❌❌ Hai perso. La frase corretta era: "{phrase.phrase_to_guess}"'
+            )
+        return match_won
