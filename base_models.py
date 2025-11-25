@@ -210,7 +210,7 @@ class Match:
             print('1) Girare la ruota')
             print('2) Comprare una vocale')
             print('3) Dare la soluzione')
-            choice = input()
+            choice = input('Scelta: ')
             match choice:
                 case '1':
                     match_result = self._spin_wheel_and_play()
@@ -223,7 +223,7 @@ class Match:
 
     def _spin_wheel_and_play(self) -> MatchResult:
         slice_value = self.wheel.turn_wheel()
-        input(f'Risultato: {slice_value}')
+        print(f'Risultato: {slice_value}')
         if isinstance(slice_value, int):
             return self._play(slice_value, is_vowel=False)
         elif slice_value.lower() == 'bancarotta':
@@ -245,11 +245,10 @@ class Match:
 
     def _play(self, slice_value: int, is_vowel: bool) -> MatchResult:
         if is_vowel:
-            print('Inserire la vocale')
+            letter = input('Inserire la vocale: ')
             slice_value = 1
         else:
-            print('Inserire la consonante')
-        letter = input()
+            letter = input('Inserire la consonante: ')
         score = self.phrase.add_letter_to_current_guess_and_compute_score(
             letter=letter, value=slice_value
         )
@@ -260,8 +259,7 @@ class Match:
         return MatchResult.LOSE
 
     def _give_solution(self) -> MatchResult:
-        print('Digita la soluzione')
-        solution = input()
+        solution = input('Digita la soluzione: ')
         if self.phrase.is_equal_to(solution):
             self.player.increase_temp_score(1000)
             return MatchResult.WIN
@@ -300,6 +298,10 @@ class FinalMatch:
 
     def _play_first_match(self) -> tuple[int, bool]:
         phrase = self.phrases[0]
+        phrase.print()
+        input('Lettere date: N R T E')
+        os.system('cls')
+
         # Add initial letters
         phrase.add_letter_to_current_guess_and_compute_score(
             letter='N', value=1
@@ -321,6 +323,7 @@ class FinalMatch:
             phrase.add_letter_to_current_guess_and_compute_score(
                 letter=letter, value=1
             )
+        os.system('cls')
         phrase.print()
 
         remaining_seconds, answer = start_match_with_time(remaining_seconds=60)
@@ -358,7 +361,7 @@ class FinalMatch:
             # print('Complimenti Hai indovinato!!!')
             show_image()
         else:
-            print(
+            input(
                 f'❌❌❌ Hai perso. La frase corretta era: "{phrase.phrase_to_guess}"'
             )
         return match_won
@@ -369,6 +372,19 @@ class FinalMatch:
         prizes: list[str | int],
         discarded_prizes: list[bool] = None,
     ):
+        # If no match was won, reveal the content of the prizes and return
+        if not any(won_matches):
+            input(
+                'Mi dispiace, hai perso. Premi per rivelare il '
+                'contenuto delle buste'
+            )
+            self._print_all_prizes(
+                won_matches=won_matches,
+                prizes=prizes,
+                discarded_prizes=[True, True, True],
+            )
+            return
+
         if discarded_prizes is None:
             discarded_prizes = [False, False, False]
 
@@ -401,7 +417,7 @@ class FinalMatch:
             won_matches=won_matches,
             prizes=prizes,
             discarded_prizes=discarded_prizes,
-            chosen_prize_index=idx
+            chosen_prize_index=idx,
         )
 
     @staticmethod
@@ -421,7 +437,7 @@ class FinalMatch:
         won_matches: list[bool],
         prizes: list[str | int],
         discarded_prizes: list[bool],
-        chosen_prize_index: int = None
+        chosen_prize_index: int = None,
     ):
         if chosen_prize_index is not None:
             for idx, prize in enumerate(prizes):

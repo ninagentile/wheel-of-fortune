@@ -32,9 +32,8 @@ def main():
         Player(name='Nina'),
     ]
 
-    # todo: remove
-    players[0].score = 100
     phrases = []
+    players[0].score = 1000
 
     curr_player_idx = 0
     wheel = Wheel()
@@ -64,8 +63,18 @@ def main():
                 curr_player_idx = change_player(
                     current_player_idx=curr_player_idx, players=players
                 )
+                input(
+                    f'❌ Mi dispiace, hai sbagliato, tocca a: '
+                    f'{players[curr_player_idx].name}'
+                )
 
     winner = choose_winner(players=players)
+    input(
+        f'Il vincitore è: {winner.name}!!!!!!!!!!!!\n'
+        f'Montepremi: {winner.score}€'
+    )
+    os.system('cls')
+
     wonder_wheel = WonderWheel()
     match = FinalMatch(
         player=winner, wheel=wonder_wheel, phrases=final_phrases
