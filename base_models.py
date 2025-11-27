@@ -108,7 +108,7 @@ class Player:
 
     def print_scores(self):
         print(
-            f'\n {self.name} \nScore: {self.temp_score} \nTotal: {self.score}\n'
+            f'\n {self.name} \nCorrente: {self.temp_score} \nTotale: {self.score}\n'
         )
 
 
@@ -291,6 +291,8 @@ class FinalMatch:
         third_match_won = self._play_third_match(remaining_seconds)
 
         # Choose among the available prizes
+        input()
+        os.system('cls')
         self._choose_prize(
             won_matches=[first_match_won, second_match_won, third_match_won],
             prizes=prizes,
@@ -358,7 +360,7 @@ class FinalMatch:
     def _give_match_result(answer: str, phrase: Phrase) -> bool:
         match_won = phrase.is_equal_to(answer)
         if match_won:
-            # print('Complimenti Hai indovinato!!!')
+            print('Complimenti Hai indovinato!!!')
             show_image()
         else:
             input(
@@ -404,26 +406,32 @@ class FinalMatch:
         self._open_prize(chosen_prize)
         discarded_prizes[idx] = True
         if self._can_change_prize(won_matches, discarded_prizes):
-            change = input('Vuoi cambiare la busta?')
+            change = input('Vuoi cambiare la busta? ')
             if change.lower() == 'si':
+                os.system('cls')
                 self._choose_prize(won_matches, prizes, discarded_prizes)
-        else:
-            if isinstance(chosen_prize, int):
-                print(f'Vincita totale: {self.player.score + chosen_prize}€')
             else:
-                print(f'Vincita totale: {self.player.score}€ e {chosen_prize}')
+                os.system('cls')
+                self._print_all_prizes(
+                    won_matches=won_matches,
+                    prizes=prizes,
+                    discarded_prizes=discarded_prizes,
+                    chosen_prize_index=idx,
+                )
+                self._print_final(chosen_prize)
+        else:
+            self._print_final(chosen_prize)
 
-        self._print_all_prizes(
-            won_matches=won_matches,
-            prizes=prizes,
-            discarded_prizes=discarded_prizes,
-            chosen_prize_index=idx,
-        )
+    def _print_final(self, chosen_prize: int | str):
+        if isinstance(chosen_prize, int):
+            print(f'Vincita totale: {self.player.score + chosen_prize}€')
+        else:
+            print(f'Vincita totale: {self.player.score}€ e {chosen_prize}')
 
     @staticmethod
     def _open_prize(chosen_prize: str | int):
         print('Il contenuto della busta è.....')
-        # sleep(5)
+        sleep(2)
         print(chosen_prize)
 
     @staticmethod
@@ -432,8 +440,8 @@ class FinalMatch:
     ) -> bool:
         return sum(won_matches) > sum(discarded_prizes)
 
+    @staticmethod
     def _print_all_prizes(
-        self,
         won_matches: list[bool],
         prizes: list[str | int],
         discarded_prizes: list[bool],
