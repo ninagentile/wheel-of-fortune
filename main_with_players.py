@@ -32,9 +32,6 @@ def main():
         Player(name='Nina'),
     ]
 
-    phrases = []
-    players[0].score = 1000
-
     curr_player_idx = 0
     wheel = Wheel()
     for phrase in phrases:
