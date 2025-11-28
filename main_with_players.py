@@ -46,7 +46,14 @@ def main():
             match_result = match.play_match()
 
             if match_result == MatchResult.WIN:
-                input('Complimenti, hai indovinato!!!')
+                # Print the completed phrase
+                os.system('cls')
+                print('Complimenti, hai indovinato!!!🥳🥳🥳')
+                phrase.set_to_guessed()
+                phrase.print()
+                curr_player.print_scores()
+                input()
+
                 # Increase the score of the winning player
                 curr_player.win_match()
 
