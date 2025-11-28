@@ -1,11 +1,9 @@
 import os
 import random
-import sys
 from abc import abstractmethod, ABC
-from datetime import datetime
-from time import sleep
 from enum import Enum
 from random import choice
+from time import sleep
 
 from show_image import show_image
 from timing import start_match_with_time, start_third_match_with_time
@@ -15,9 +13,19 @@ vowel_cost = 300
 
 class Phrase:
     def __init__(self, title: str, phrase_to_guess: str):
-        self.title: str = title
-        self.phrase_to_guess: str = phrase_to_guess
+        self.title: str = title.upper()
+        self.phrase_to_guess: str = phrase_to_guess.upper()
         self.current_guess = self._initialize_current_guess()
+
+    def set_to_guessed(self):
+        """
+        Sets current_guess equal to phrase_to_guess
+        """
+        current_guess = []
+        for char in self.phrase_to_guess:
+            current_guess.append(char)
+
+        self.current_guess = current_guess
 
     def _initialize_current_guess(self) -> list[str]:
         current_guess = []
@@ -158,6 +166,9 @@ class WonderWheel(AbstractWheel):
         random.shuffle(self.slices)
 
     def turn_wheel(self) -> list[str | int]:
+        """
+        Turns the wheel returning 3 slices values
+        """
         chosen_slice_idx = random.randint(0, len(self.slices) - 1)
         first_slice_idx = chosen_slice_idx - 1
         if first_slice_idx < 0:
@@ -173,6 +184,9 @@ class WonderWheel(AbstractWheel):
 
     @staticmethod
     def _initialize_slices() -> list[Slice]:
+        """
+        Inizializes the slices of the wheel with the final prizes
+        """
         slices = []
         for i in range(4):
             for prize in [100, 1000, 5000, 10000]:
@@ -189,18 +203,45 @@ class WonderWheel(AbstractWheel):
 
 
 class MatchResult(Enum):
+    """
+    Results of a match
+
+    Fields
+    ------
+    WIN
+        The player won the match
+    LOSE
+        The player lost the match
+    KEEP_PLAYING
+        The player can still play the match (for example, turning the
+        wheel)
+    """
     WIN = 'win'
     LOSE = 'lose'
     KEEP_PLAYING = 'keep_playing'
 
 
 class Match:
+    """
+    Class containing methods to play a match of the game for a specific
+    player
+    """
     def __init__(self, wheel: Wheel, player: Player, phrase: Phrase):
         self.wheel = wheel
         self.player = player
         self.phrase = phrase
 
-    def play_match(self):
+    def play_match(self) -> MatchResult:
+        """
+        Plays the match allowing the current player to select among:
+        inserting a consontant, inserting a vowel or giving the solution
+
+        Returns
+        -------
+        match_result
+            MatchResult enum, either WIN if the player won or LOSE if he
+            lost the match
+        """
         match_result = MatchResult.KEEP_PLAYING
         while match_result == MatchResult.KEEP_PLAYING:
             os.system('cls')
@@ -222,6 +263,16 @@ class Match:
         return match_result
 
     def _spin_wheel_and_play(self) -> MatchResult:
+        """
+        Extracts a slice from the wheel, if the slice is a prize it lets
+        the player choose a consonant to insert
+
+        Returns
+        -------
+        match_result
+            MatchResult enum, either KEEP_PLAYING if the player can keep
+            playing or LOSE if he got a bankrupt or pass slice
+        """
         slice_value = self.wheel.turn_wheel()
         print(f'Risultato: {slice_value}')
         if isinstance(slice_value, int):
@@ -233,6 +284,17 @@ class Match:
             return MatchResult.LOSE
 
     def _insert_vowel(self) -> MatchResult:
+        """
+        Inserts a vowel in the current phrase, checking if it can be
+        inserted and decreasing the player's score
+
+        Returns
+        -------
+        match_result
+            MatchResult enum, either KEEP_PLAYING if the player can keep
+            playing or LOSE if he inserted a vowel that is not in the
+            phrase to guess
+        """
         if self._check_vowel_can_be_inserted():
             match_result = self._play(slice_value=0, is_vowel=True)
             self.player.decrease_temp_score(vowel_cost)
@@ -241,9 +303,29 @@ class Match:
             return MatchResult.LOSE
 
     def _check_vowel_can_be_inserted(self) -> bool:
+        """
+        Checks if the user has enough money to buy a vowel
+
+        Returns
+        -------
+        can_be_inserted
+            True if the user can insert the vowel, False otherwise
+        """
         return self.player.temp_score >= vowel_cost
 
     def _play(self, slice_value: int, is_vowel: bool) -> MatchResult:
+        """
+        It lets the player choose a letter to insert, and computes the
+        obtained score. If the score is 0, the letter is not present and
+        it returns MatchResult.LOSE
+
+        Returns
+        -------
+        match_result
+            MatchResult enum, either KEEP_PLAYING if the player can keep
+            playing or LOSE if he inserted a letter that is not in the
+            phrase to guess
+        """
         if is_vowel:
             letter = input('Inserire la vocale: ')
             slice_value = 1
@@ -259,6 +341,16 @@ class Match:
         return MatchResult.LOSE
 
     def _give_solution(self) -> MatchResult:
+        """
+        Lets the player insert the solution, and it checks that it
+        matches the phrase to guess
+
+        Returns
+        -------
+        match_result
+            MatchResult enum, either WIN if the player gave the correct
+            solution or LOSE if he did not
+        """
         solution = input('Digita la soluzione: ')
         if self.phrase.is_equal_to(solution):
             self.player.increase_temp_score(1000)
@@ -267,6 +359,10 @@ class Match:
 
 
 class FinalMatch:
+    """
+    Class to handle the final match of the game, where the user tries to
+    guess 3 phrases sharing a common topic in less than a minute.
+    """
     def __init__(
         self, player: Player, wheel: WonderWheel, phrases: list[Phrase]
     ):
@@ -275,6 +371,14 @@ class FinalMatch:
         self.phrases = phrases
 
     def play_match(self):
+        """
+        Lets the player play the final game, where he has to guess 3
+        different phrases and eventually choose a prize if he guessed.
+
+        Returns
+        -------
+
+        """
         # Turn the wheel and get 3 slices
         prizes = self.wheel.turn_wheel()
 
@@ -299,6 +403,18 @@ class FinalMatch:
         )
 
     def _play_first_match(self) -> tuple[int, bool]:
+        """
+        Handles the first match. At first, 4 letters (N R T E) are
+        given, the user has to choose other 3 consonants and a vowel.
+        Then, the timer starts, and he can try to guess or stop the
+        timer to skip.
+
+        Returns
+        -------
+        remaining_seconds, match_won
+            Tuple containing the seconds remaining after the match and
+            a boolean indicating if the match was won
+        """
         phrase = self.phrases[0]
         phrase.print()
         input('Lettere date: N R T E')
@@ -333,6 +449,22 @@ class FinalMatch:
         return remaining_seconds, match_won
 
     def _play_second_match(self, remaining_seconds: int) -> tuple[int, bool]:
+        """
+        Handles the second match. Only the first and the last letter of
+        each word are shown. Then, the timer starts, and the user can
+        try to guess or stop the timer to skip.
+
+        Parameters
+        ----------
+        remaining_seconds
+            Rhe seconds remaining after the first match
+
+        Returns
+        -------
+        remaining_seconds, match_won
+            Tuple containing the seconds remaining after the match and
+            a boolean indicating if the match was won
+        """
         phrase = self.phrases[1]
         phrase.reveal_start_and_end()
         phrase.print()
@@ -345,6 +477,23 @@ class FinalMatch:
         return remaining_seconds, match_won
 
     def _play_third_match(self, remaining_seconds: int) -> bool:
+        """
+        Handles the third match. The user has to tell the letters (and
+        only one vowel) he wants to insert, one at a time. If the letter
+        is wrong, the remaining seconds are decreased. The user can
+        insert a number to stop the timer and try to guess.
+
+        Parameters
+        ----------
+        remaining_seconds
+            Rhe seconds remaining after the first match
+
+        Returns
+        -------
+        remaining_seconds, match_won
+            Tuple containing the seconds remaining after the match and
+            a boolean indicating if the match was won
+        """
         phrase = self.phrases[-1]
         phrase.print()
 
